@@ -15,7 +15,6 @@ class keyCommends(QtWidgets.QWidget):
         self.root = parent
 
     def shortcut_cmd(self, key):
-        print(key, type(key))
         if key == "Ctrl+S":
             self.cmd_save()
         elif key == "Ctrl+O":
@@ -23,14 +22,12 @@ class keyCommends(QtWidgets.QWidget):
 
     def cmd_save(self):
         if self.root.Edit_file_path == "":
-            options = QtWidgets.QFileDialog.Options()
-            options |= QtWidgets.QFileDialog.DontUseNativeDialog
             dialog = QtWidgets.QFileDialog.getSaveFileName
-            fileName, _ = dialog(self,"QFileDialog.getSaveFileName()","","모든 파일 (*)", options=options)
+            fileName, _ = dialog(self,"QFileDialog.getSaveFileName()","","모든 파일 (*)")
         else:
             fileName = self.root.Edit_file_path
-        os.mkdir(fileName)
         if fileName:
+            os.mkdir(fileName)
             self.root.Edit_file_path = fileName
             text = self.root.tabs.view_editor.editor.toPlainText()
             with open(os.path.join(fileName,"text.md"), "w+", encoding='utf8') as f:
@@ -42,9 +39,9 @@ class keyCommends(QtWidgets.QWidget):
             shutil.rmtree(self.root.Edit_file_path)
 
     def cmd_open(self):
-        options = QtWidgets.QFileDialog.Options()
-        options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","책 파일 (*.mdbk);;모든 파일 (*)", options=options)
+        fileDialog = QtWidgets.QFileDialog(self)
+        fileDialog.setNameFilter("책 파일 (*.mdbk);;모든 파일 (*)")
+        fileName, _ = fileDialog.getOpenFileName()
         if fileName:
             self.root.Edit_file_path = fileName
             tar = tarfile.open(fileName)
@@ -55,15 +52,4 @@ class keyCommends(QtWidgets.QWidget):
                     f = tar.extractfile(member)
                     content = f.read()
                     self.root.tabs.view_editor.editor.setText(content.decode("utf-8"))
-
-            """
-            import tarfile
-tar = tarfile.open("test.mdbk")
-print(tar.getmembers())
-for member in tar.getmembers()[1:]:
-    f=tar.extractfile(member)
-    content=f.read()
-    print(content.decode("utf-8"))
-tar.close()
-            """
 
